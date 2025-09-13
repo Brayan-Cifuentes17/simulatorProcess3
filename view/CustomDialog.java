@@ -2,6 +2,7 @@ package view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -23,9 +24,9 @@ public class CustomDialog extends JDialog implements KeyListener {
     
     public CustomDialog(ActionListener listener, String text, int type){
        
-        int lines = quantityOfWords(text, "<br>") + 1;
-        int baseWidth = Math.max(350, text.length() * 8); 
-        int baseHeight = 120 + (lines * 25); 
+            int lines = quantityOfWords(text, "<br>") + 1;
+            int baseWidth = Math.max(500, text.length() * 10);
+            int baseHeight = 140 + (lines * 30);
         
         if(type == CONFIRM_TYPE) {
             baseHeight += 20; 
@@ -64,13 +65,14 @@ public class CustomDialog extends JDialog implements KeyListener {
     public void initComponents(ActionListener listener, String text, int type){
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setPreferredSize(this.getSize());
-        panel.setBackground(Color.lightGray);
+        panel.setBackground(new Color(44, 62, 80));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 15, 15, 15); 
         
         
-        JLabel label = new JLabel("<html><div style='text-align: center; width: " + 
-                                 (this.getWidth() - 60) + "px;'>" + text + "</div></html>");
+        JLabel label = new JLabel("<html><center><font size='5' color='white'>" + text + "</font></center></html>");
+        label.setFont(new Font("Arial", Font.PLAIN, 16));
+        label.setForeground(Color.WHITE);
         label.setHorizontalAlignment(JLabel.CENTER);
         panel.add(label, gbc);
         gbc.gridy = 1;
@@ -83,11 +85,18 @@ public class CustomDialog extends JDialog implements KeyListener {
             yesButton.addActionListener(listener);
             yesButton.setActionCommand(Constants.CONFIRM_YES);
             yesButton.addKeyListener(this);
-            
+            yesButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            yesButton.setBackground(Color.WHITE);
+            yesButton.setForeground(new Color(44, 62, 80));
+
+
             JButton noButton = new JButton("No");
             noButton.addActionListener(listener);
             noButton.setActionCommand(Constants.CONFIRM_NO);
             noButton.addKeyListener(this);
+            noButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            noButton.setBackground(Color.WHITE);
+            noButton.setForeground(new Color(44, 62, 80));
             
             buttonPanel.add(yesButton);
             buttonPanel.add(noButton);
@@ -101,6 +110,9 @@ public class CustomDialog extends JDialog implements KeyListener {
             JButton button = new JButton("Aceptar");
             button.addActionListener(listener);
             button.addKeyListener(this);
+            button.setFont(new Font("Arial", Font.PLAIN, 14));
+            button.setBackground(Color.WHITE);
+            button.setForeground(new Color(44, 62, 80));
             
             if(type == WARNING_TYPE) {
                 button.setActionCommand(Constants.CLOSE_WARNING);

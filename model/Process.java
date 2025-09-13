@@ -4,10 +4,10 @@ public class Process {
     private String name;
     private long originalTime;
     private long remainingTime;
-    private Status status; // BLOQUEADO o NO_BLOQUEADO
+    private Status status; 
     private int cycleCount;
     
-    // Estados de suspensión según el diagrama
+   
     private Status suspendedReady;    // SUSPENDIDO_LISTO o NO_SUSPENDIDO_LISTO
     private Status suspendedBlocked;  // SUSPENDIDO_BLOQUEADO o NO_SUSPENDIDO_BLOQUEADO
     private Status resumed;           // REANUDADO o NO_REANUDADO
@@ -82,7 +82,7 @@ public class Process {
         remainingTime = originalTime;
     }
 
-    // Getters
+
     public String getName() {
         return name;
     }
@@ -131,7 +131,7 @@ public class Process {
         return resumed == Status.REANUDADO ? "Si" : "No";
     }
 
-    // Setters
+  
     public void setName(String name) {
         this.name = name;
     }

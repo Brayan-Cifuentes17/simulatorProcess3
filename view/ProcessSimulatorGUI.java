@@ -16,39 +16,39 @@ import java.util.Locale;
 
 public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private ProcessManager processManager;
-    
-    // Campos del formulario simplificados
+
+   
     private JTextField txtProcessName;
     private JTextField txtProcessTime;
     private JComboBox<String> cmbStatus;
     private JComboBox<String> cmbSuspendedReady;
     private JComboBox<String> cmbSuspendedBlocked;
     private JComboBox<String> cmbResumed;
+
     
-    // Tabla de procesos
     private DefaultTableModel processTableModel;
     private JTable processTable;
-    
-    // Panel de resultados
+
+   
     private JPanel resultsPanel;
     private CardLayout cardLayout;
+
     
-    // Tablas de resultados
     private DefaultTableModel[] resultTableModels;
     private String[] tableNames = {
-        "Inicial", "Listos", "Despachados", "En Ejecución", 
-        "Tiempo Expirado", "Bloqueados", "Despertar", "Finalizados",
-        "Suspender Listos", "Suspendido Listo", "Reanudar Listos",
-        "Suspender Bloqueados", "Suspendido Bloqueado", "Reanudar Bloqueados",
-        "Suspendido Bloq a Suspendido Listo"
+            "Inicial", "Listos", "Despachados", "En Ejecución",
+            "Tiempo Expirado", "Bloqueados", "Despertar", "Finalizados",
+            "Suspender Listos", "Suspendido Listo", "Reanudar Listos",
+            "Suspender Bloqueados", "Suspendido Bloqueado", "Reanudar Bloqueados",
+            "Suspendido Bloq a Suspendido Listo"
     };
-    
+
     private Filter[] filters = {
-        Filter.INICIAL, Filter.LISTO, Filter.DESPACHADO, Filter.EN_EJECUCION,
-        Filter.TIEMPO_EXPIRADO, Filter.BLOQUEADO, Filter.DESPERTAR, Filter.FINALIZADO,
-        Filter.SUSPENDER_LISTOS, Filter.SUSPENDIDO_LISTO, Filter.REANUDAR_LISTOS,
-        Filter.SUSPENDER_BLOQUEADOS, Filter.SUSPENDIDO_BLOQUEADO, Filter.REANUDAR_BLOQUEADOS,
-        Filter.TRANSICION_BLOQUEADO_A_LISTO
+            Filter.INICIAL, Filter.LISTO, Filter.DESPACHADO, Filter.EN_EJECUCION,
+            Filter.TIEMPO_EXPIRADO, Filter.BLOQUEADO, Filter.DESPERTAR, Filter.FINALIZADO,
+            Filter.SUSPENDER_LISTOS, Filter.SUSPENDIDO_LISTO, Filter.REANUDAR_LISTOS,
+            Filter.SUSPENDER_BLOQUEADOS, Filter.SUSPENDIDO_BLOQUEADO, Filter.REANUDAR_BLOQUEADOS,
+            Filter.TRANSICION_BLOQUEADO_A_LISTO
     };
 
     private String currentAction;
@@ -60,7 +60,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         initializeComponents();
         setupLayout();
         setupEventHandlers();
-        
+
         setUndecorated(true);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
@@ -68,19 +68,20 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private void initializeComponents() {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Campos del formulario
+        
         txtProcessName = new JTextField(15);
         txtProcessTime = new JTextField(15);
-        cmbStatus = new JComboBox<>(new String[]{"No Bloqueado", "Bloqueado"});
-        cmbSuspendedReady = new JComboBox<>(new String[]{"No", "Si"});
-        cmbSuspendedBlocked = new JComboBox<>(new String[]{"No", "Si"});
-        cmbResumed = new JComboBox<>(new String[]{"No", "Si"});
+        cmbStatus = new JComboBox<>(new String[] { "No Bloqueado", "Bloqueado" });
+        cmbSuspendedReady = new JComboBox<>(new String[] { "No", "Si" });
+        cmbSuspendedBlocked = new JComboBox<>(new String[] { "No", "Si" });
+        cmbResumed = new JComboBox<>(new String[] { "No", "Si" });
 
         setupTimeField();
 
-        // Tabla de procesos simplificada
+       
         processTableModel = new DefaultTableModel(
-            new String[]{"Nombre", "Tiempo", "Estado", "Suspendido Listo", "Suspendido Bloqueado", "Reanudado"}, 0) {
+                new String[] { "Nombre", "Tiempo", "Estado", "Suspendido Listo", "Suspendido Bloqueado", "Reanudado" },
+                0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -89,21 +90,23 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         processTable = new JTable(processTableModel);
         processTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Panel de resultados
+       
         cardLayout = new CardLayout();
         resultsPanel = new JPanel(cardLayout);
-        
-        // Crear tablas de resultados
+
+       
         resultTableModels = new DefaultTableModel[tableNames.length];
         for (int i = 0; i < tableNames.length; i++) {
             resultTableModels[i] = new DefaultTableModel(
-                new String[]{"Proceso", "Tiempo Restante", "Estado", "Suspendido Listo", "Suspendido Bloqueado", "Reanudado", "Ciclos"}, 0) {
+                    new String[] { "Proceso", "Tiempo Restante", "Estado", "Suspendido Listo", "Suspendido Bloqueado",
+                            "Reanudado", "Ciclos" },
+                    0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
                     return false;
                 }
             };
-            
+
             JTable table = new JTable(resultTableModels[i]);
             table.setFont(new Font("Arial", Font.PLAIN, 14));
             JScrollPane scrollPane = new JScrollPane(table);
@@ -120,7 +123,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                     e.consume();
                     return;
                 }
-                
+
                 if (Character.isDigit(c)) {
                     SwingUtilities.invokeLater(() -> {
                         formatTimeFieldInRealTime();
@@ -129,7 +132,8 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
             }
 
             @Override
-            public void keyPressed(KeyEvent e) {}
+            public void keyPressed(KeyEvent e) {
+            }
 
             @Override
             public void keyReleased(KeyEvent e) {
@@ -143,7 +147,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         if (!text.isEmpty()) {
             try {
                 String displayText = text;
-                
+
                 if (text.length() > 18) {
                     StringBuilder formatted = new StringBuilder();
                     int count = 0;
@@ -159,12 +163,13 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                     long number = Long.parseLong(text);
                     displayText = numberFormatter.format(number);
                 }
-                
+
                 if (!txtProcessTime.getText().equals(displayText)) {
                     int caretPos = txtProcessTime.getCaretPosition();
                     txtProcessTime.setText(displayText);
                     try {
-                        int newCaretPos = Math.min(caretPos + (displayText.length() - text.length()), displayText.length());
+                        int newCaretPos = Math.min(caretPos + (displayText.length() - text.length()),
+                                displayText.length());
                         txtProcessTime.setCaretPosition(newCaretPos);
                     } catch (IllegalArgumentException ex) {
                         txtProcessTime.setCaretPosition(displayText.length());
@@ -181,7 +186,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                         formatted.insert(0, text.charAt(i));
                         count++;
                     }
-                    
+
                     if (!txtProcessTime.getText().equals(formatted.toString())) {
                         int caretPos = txtProcessTime.getCaretPosition();
                         txtProcessTime.setText(formatted.toString());
@@ -201,11 +206,11 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         if (numbersOnly.isEmpty()) {
             throw new NumberFormatException("Campo vacío");
         }
-        
+
         if (numbersOnly.length() > 18) {
             numbersOnly = numbersOnly.substring(0, 18);
         }
-        
+
         while (numbersOnly.length() > 1) {
             try {
                 long result = Long.parseLong(numbersOnly);
@@ -214,7 +219,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                 numbersOnly = numbersOnly.substring(1);
             }
         }
-        
+
         return Long.parseLong(numbersOnly);
     }
 
@@ -229,7 +234,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private void setupLayout() {
         setLayout(new BorderLayout());
 
-        // Panel del título
+       
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(new Color(44, 62, 80));
         JLabel titleLabel = new JLabel("SIMULADOR DE PROCESOS");
@@ -237,7 +242,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         titleLabel.setForeground(Color.WHITE);
         titlePanel.add(titleLabel);
 
-        // Panel izquierdo
+     
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         leftPanel.setPreferredSize(new Dimension(450, 0));
@@ -252,13 +257,13 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         JPanel actionPanel = createActionPanel();
         leftPanel.add(actionPanel, BorderLayout.SOUTH);
 
-        // Panel derecho
+     
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.setBorder(BorderFactory.createTitledBorder("Resultados de la Simulación"));
 
         JPanel buttonPanel = createResultButtonPanel();
         rightPanel.add(buttonPanel, BorderLayout.NORTH);
-        
+
         rightPanel.add(resultsPanel, BorderLayout.CENTER);
 
         add(titlePanel, BorderLayout.NORTH);
@@ -273,44 +278,50 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         int row = 0;
-        
-        // Nombre
-        gbc.gridx = 0; gbc.gridy = row;
+
+       
+        gbc.gridx = 0;
+        gbc.gridy = row;
         panel.add(new JLabel("Nombre:"), gbc);
         gbc.gridx = 1;
         panel.add(txtProcessName, gbc);
         row++;
 
-        // Tiempo
-        gbc.gridx = 0; gbc.gridy = row;
+     
+        gbc.gridx = 0;
+        gbc.gridy = row;
         panel.add(new JLabel("Tiempo:"), gbc);
         gbc.gridx = 1;
         panel.add(txtProcessTime, gbc);
         row++;
 
-        // Estado
-        gbc.gridx = 0; gbc.gridy = row;
+       
+        gbc.gridx = 0;
+        gbc.gridy = row;
         panel.add(new JLabel("Estado:"), gbc);
         gbc.gridx = 1;
         panel.add(cmbStatus, gbc);
         row++;
 
-        // Suspendido Listo
-        gbc.gridx = 0; gbc.gridy = row;
+        
+        gbc.gridx = 0;
+        gbc.gridy = row;
         panel.add(new JLabel("Suspendido Listo:"), gbc);
         gbc.gridx = 1;
         panel.add(cmbSuspendedReady, gbc);
         row++;
 
-        // Suspendido Bloqueado
-        gbc.gridx = 0; gbc.gridy = row;
+        
+        gbc.gridx = 0;
+        gbc.gridy = row;
         panel.add(new JLabel("Suspendido Bloqueado:"), gbc);
         gbc.gridx = 1;
         panel.add(cmbSuspendedBlocked, gbc);
         row++;
 
-        // Reanudado
-        gbc.gridx = 0; gbc.gridy = row;
+        
+        gbc.gridx = 0;
+        gbc.gridy = row;
         panel.add(new JLabel("Reanudado:"), gbc);
         gbc.gridx = 1;
         panel.add(cmbResumed, gbc);
@@ -321,7 +332,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private JPanel createActionPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -344,20 +355,20 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         btnExit.setPreferredSize(buttonSize);
         btnManual.setPreferredSize(buttonSize);
 
-        // Colores para botones importantes
+       
         btnSimulate.setBackground(new Color(46, 125, 50));
         btnSimulate.setForeground(Color.WHITE);
         btnSimulate.setOpaque(true);
         btnSimulate.setBorderPainted(false);
         btnSimulate.setFocusPainted(false);
-        
+
         btnExit.setBackground(new Color(198, 40, 40));
         btnExit.setForeground(Color.WHITE);
         btnExit.setOpaque(true);
         btnExit.setBorderPainted(false);
         btnExit.setFocusPainted(false);
 
-        // Event listeners
+     
         btnAdd.addActionListener(e -> addProcess());
         btnEdit.addActionListener(e -> editProcess());
         btnDelete.addActionListener(e -> deleteProcess());
@@ -366,60 +377,68 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         btnManual.addActionListener(e -> openUserManual());
         btnReset.addActionListener(e -> clearAll());
 
-        // Layout de botones
-        gbc.gridx = 0; gbc.gridy = 0;
+     
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         panel.add(btnAdd, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 1;
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         panel.add(btnEdit, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 2;
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         panel.add(btnDelete, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 3;
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         panel.add(btnSimulate, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         panel.add(btnManual, gbc);
-        
-        gbc.gridx = 1; gbc.gridy = 1;
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
         panel.add(btnReset, gbc);
-        
-        gbc.gridx = 1; gbc.gridy = 2;
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
         panel.add(btnExit, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 3;
+        gbc.gridx = 1;
+        gbc.gridy = 3;
         panel.add(Box.createRigidArea(new Dimension(0, 0)), gbc);
 
         return panel;
     }
 
     private JPanel createResultButtonPanel() {
-            JPanel panel = new JPanel(new GridLayout(3, 5, 5, 5));
-            
-            for (int i = 0; i < tableNames.length; i++) {
-                JButton btn = new JButton(tableNames[i]);
-                btn.setPreferredSize(new Dimension(120, 30));
-                final int index = i;
-                btn.addActionListener(e -> {
-                    cardLayout.show(resultsPanel, tableNames[index]);
-                    updateResultTable(index);
-                });
-                panel.add(btn);
-            }
+        JPanel panel = new JPanel(new GridLayout(3, 5, 5, 5));
 
-            return panel;
+        for (int i = 0; i < tableNames.length; i++) {
+            JButton btn = new JButton(tableNames[i]);
+            btn.setPreferredSize(new Dimension(120, 30));
+            final int index = i;
+            btn.addActionListener(e -> {
+                cardLayout.show(resultsPanel, tableNames[index]);
+                updateResultTable(index);
+            });
+            panel.add(btn);
         }
 
+        return panel;
+    }
+
     private void setupEventHandlers() {
-        // Método placeholder para configuraciones adicionales
+        
     }
 
     private void addProcess() {
         String name = txtProcessName.getText().trim();
         String timeText = txtProcessTime.getText().trim();
 
-        // Validaciones
+    
         if (name.isEmpty()) {
             showError("El nombre del proceso no puede estar vacío");
             return;
@@ -437,30 +456,32 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                 return;
             }
 
-            // Obtener estados
-            Status status = cmbStatus.getSelectedIndex() == 0 ? 
-                Status.NO_BLOQUEADO : Status.BLOQUEADO;
-            
-            Status suspendedReady = cmbSuspendedReady.getSelectedIndex() == 0 ? 
-                Status.NO_SUSPENDIDO_LISTO : Status.SUSPENDIDO_LISTO;
-            
-            Status suspendedBlocked = cmbSuspendedBlocked.getSelectedIndex() == 0 ? 
-                Status.NO_SUSPENDIDO_BLOQUEADO : Status.SUSPENDIDO_BLOQUEADO;
-            
-            Status resumed = cmbResumed.getSelectedIndex() == 0 ? 
-                Status.NO_REANUDADO : Status.REANUDADO;
+           
+            Status status = cmbStatus.getSelectedIndex() == 0 ? Status.NO_BLOQUEADO : Status.BLOQUEADO;
 
-            // Validaciones lógicas
-            if (resumed == Status.REANUDADO && 
-                suspendedReady == Status.NO_SUSPENDIDO_LISTO && 
-                suspendedBlocked == Status.NO_SUSPENDIDO_BLOQUEADO) {
+            Status suspendedReady = cmbSuspendedReady.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_LISTO
+                    : Status.SUSPENDIDO_LISTO;
+
+            Status suspendedBlocked = cmbSuspendedBlocked.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_BLOQUEADO
+                    : Status.SUSPENDIDO_BLOQUEADO;
+
+            Status resumed = cmbResumed.getSelectedIndex() == 0 ? Status.NO_REANUDADO : Status.REANUDADO;
+
+          
+            if (resumed == Status.REANUDADO &&
+                    suspendedReady == Status.NO_SUSPENDIDO_LISTO &&
+                    suspendedBlocked == Status.NO_SUSPENDIDO_BLOQUEADO) {
                 showError("Un proceso no puede ser reanudado sin estar suspendido");
                 return;
             }
+            if (suspendedBlocked == Status.SUSPENDIDO_BLOQUEADO && status == Status.NO_BLOQUEADO) {
+                showError("Un proceso no puede marcarse como Suspendido Bloqueado si su estado es No Bloqueado");
+                return;
+            }
 
-            // Agregar proceso
+       
             processManager.addProcess(name, time, status, suspendedReady, suspendedBlocked, resumed);
-            
+
             updateProcessTable();
             clearForm();
             showInfo("Proceso agregado exitosamente");
@@ -479,7 +500,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
         String oldName = (String) processTableModel.getValueAt(selectedRow, 0);
         model.Process selectedProcess = null;
-        
+
         for (model.Process p : processManager.getInitialProcesses()) {
             if (p.getName().equals(oldName)) {
                 selectedProcess = p;
@@ -487,7 +508,8 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
             }
         }
 
-        if (selectedProcess == null) return;
+        if (selectedProcess == null)
+            return;
 
         JDialog editDialog = createEditDialog(selectedProcess, selectedRow);
         editDialog.setVisible(true);
@@ -502,26 +524,26 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 10, 8, 10);
 
-        // Campos del diálogo
+        
         JTextField txtEditName = new JTextField(process.getName(), 20);
         txtEditName.setEditable(false);
         txtEditName.setBackground(Color.LIGHT_GRAY);
 
         JTextField txtEditTime = new JTextField(String.valueOf(process.getOriginalTime()), 20);
 
-        JComboBox<String> cmbEditStatus = new JComboBox<>(new String[]{"No Bloqueado", "Bloqueado"});
+        JComboBox<String> cmbEditStatus = new JComboBox<>(new String[] { "No Bloqueado", "Bloqueado" });
         cmbEditStatus.setSelectedIndex(process.isBlocked() ? 1 : 0);
 
-        JComboBox<String> cmbEditSuspendedReady = new JComboBox<>(new String[]{"No", "Si"});
+        JComboBox<String> cmbEditSuspendedReady = new JComboBox<>(new String[] { "No", "Si" });
         cmbEditSuspendedReady.setSelectedIndex(process.isSuspendedReady() ? 1 : 0);
 
-        JComboBox<String> cmbEditSuspendedBlocked = new JComboBox<>(new String[]{"No", "Si"});
+        JComboBox<String> cmbEditSuspendedBlocked = new JComboBox<>(new String[] { "No", "Si" });
         cmbEditSuspendedBlocked.setSelectedIndex(process.isSuspendedBlocked() ? 1 : 0);
 
-        JComboBox<String> cmbEditResumed = new JComboBox<>(new String[]{"No", "Si"});
+        JComboBox<String> cmbEditResumed = new JComboBox<>(new String[] { "No", "Si" });
         cmbEditResumed.setSelectedIndex(process.isResumed() ? 1 : 0);
 
-        // Layout del diálogo
+        
         int row = 0;
         addDialogComponent(dialog, gbc, "Nombre:", txtEditName, row++);
         addDialogComponent(dialog, gbc, "Tiempo:", txtEditTime, row++);
@@ -530,19 +552,19 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         addDialogComponent(dialog, gbc, "Suspendido Bloqueado:", cmbEditSuspendedBlocked, row++);
         addDialogComponent(dialog, gbc, "Reanudado:", cmbEditResumed, row++);
 
-        // Botones
+        
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         JButton btnSave = new JButton("Guardar");
         JButton btnCancel = new JButton("Cancelar");
-        
+
         Dimension buttonSize = new Dimension(100, 30);
         btnSave.setPreferredSize(buttonSize);
         btnCancel.setPreferredSize(buttonSize);
 
         btnSave.addActionListener(e -> {
-            if (saveEditedProcess(dialog, process, selectedRow, txtEditTime, 
-                                cmbEditStatus, cmbEditSuspendedReady, 
-                                cmbEditSuspendedBlocked, cmbEditResumed)) {
+            if (saveEditedProcess(dialog, process, selectedRow, txtEditTime,
+                    cmbEditStatus, cmbEditSuspendedReady,
+                    cmbEditSuspendedBlocked, cmbEditResumed)) {
                 dialog.dispose();
             }
         });
@@ -552,11 +574,13 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
 
-        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 2;
         gbc.insets = new Insets(20, 10, 10, 10);
         dialog.add(buttonPanel, gbc);
 
-        // Teclas de acceso rápido
+        
         dialog.addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -566,29 +590,34 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                     dialog.dispose();
                 }
             }
-            
+
             @Override
-            public void keyTyped(KeyEvent e) {}
-            
+            public void keyTyped(KeyEvent e) {
+            }
+
             @Override
-            public void keyReleased(KeyEvent e) {}
+            public void keyReleased(KeyEvent e) {
+            }
         });
-        
+
         dialog.setFocusable(true);
         dialog.requestFocus();
 
         return dialog;
     }
 
-    private void addDialogComponent(JDialog dialog, GridBagConstraints gbc, String label, JComponent component, int row) {
-        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 1;
+    private void addDialogComponent(JDialog dialog, GridBagConstraints gbc, String label, JComponent component,
+            int row) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
         gbc.fill = GridBagConstraints.NONE;
-        
+
         JLabel lblComponent = new JLabel(label);
         lblComponent.setPreferredSize(new Dimension(140, 25));
         dialog.add(lblComponent, gbc);
-        
+
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -596,9 +625,9 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     }
 
     private boolean saveEditedProcess(JDialog dialog, model.Process originalProcess, int selectedRow,
-                                JTextField txtTime, JComboBox<String> cmbStatus, 
-                                JComboBox<String> cmbSuspendedReady, JComboBox<String> cmbSuspendedBlocked,
-                                JComboBox<String> cmbResumed) {
+            JTextField txtTime, JComboBox<String> cmbStatus,
+            JComboBox<String> cmbSuspendedReady, JComboBox<String> cmbSuspendedBlocked,
+            JComboBox<String> cmbResumed) {
         try {
             long newTime = parseTimeFieldForDialog(txtTime);
             if (newTime <= 0) {
@@ -607,21 +636,27 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
             }
 
             Status newStatus = cmbStatus.getSelectedIndex() == 0 ? Status.NO_BLOQUEADO : Status.BLOQUEADO;
-            Status newSuspendedReady = cmbSuspendedReady.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_LISTO : Status.SUSPENDIDO_LISTO;
-            Status newSuspendedBlocked = cmbSuspendedBlocked.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_BLOQUEADO : Status.SUSPENDIDO_BLOQUEADO;
+            Status newSuspendedReady = cmbSuspendedReady.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_LISTO
+                    : Status.SUSPENDIDO_LISTO;
+            Status newSuspendedBlocked = cmbSuspendedBlocked.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_BLOQUEADO
+                    : Status.SUSPENDIDO_BLOQUEADO;
             Status newResumed = cmbResumed.getSelectedIndex() == 0 ? Status.NO_REANUDADO : Status.REANUDADO;
 
-            // Validación lógica
-            if (newResumed == Status.REANUDADO && 
-                newSuspendedReady == Status.NO_SUSPENDIDO_LISTO && 
-                newSuspendedBlocked == Status.NO_SUSPENDIDO_BLOQUEADO) {
+           
+            if (newResumed == Status.REANUDADO &&
+                    newSuspendedReady == Status.NO_SUSPENDIDO_LISTO &&
+                    newSuspendedBlocked == Status.NO_SUSPENDIDO_BLOQUEADO) {
                 showError("Un proceso no puede ser reanudado sin estar suspendido");
                 return false;
             }
+            if (newSuspendedBlocked == Status.SUSPENDIDO_BLOQUEADO && newStatus == Status.NO_BLOQUEADO) {
+                showError("Un proceso no puede marcarse como Suspendido Bloqueado si su estado es No Bloqueado");
+                return false;
+}
 
             processManager.editProcess(selectedRow, originalProcess.getName(), newTime, newStatus,
-                                     newSuspendedReady, newSuspendedBlocked, newResumed);
-            
+                    newSuspendedReady, newSuspendedBlocked, newResumed);
+
             updateProcessTable();
             showInfo("Proceso editado exitosamente");
             return true;
@@ -641,7 +676,8 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
         String processName = (String) processTableModel.getValueAt(selectedRow, 0);
         currentAction = "DELETE_PROCESS:" + processName;
-        new CustomDialog(this, "¿Está seguro de que desea eliminar el proceso '" + processName + "'?", CustomDialog.CONFIRM_TYPE);
+        new CustomDialog(this, "¿Está seguro de que desea eliminar el proceso '" + processName + "'?",
+                CustomDialog.CONFIRM_TYPE);
     }
 
     private void runSimulation() {
@@ -651,66 +687,66 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         }
 
         processManager.runSimulation();
+
         
-        // Actualizar todas las tablas de resultados
         for (int i = 0; i < tableNames.length; i++) {
             updateResultTable(i);
         }
-        
+
         cardLayout.show(resultsPanel, tableNames[0]);
         showInfo("Simulación ejecutada exitosamente");
     }
 
     private void updateProcessTable() {
         processTableModel.setRowCount(0);
-        
+
         for (model.Process p : processManager.getInitialProcesses()) {
             String formattedTime = numberFormatter.format(p.getOriginalTime());
-            
-            processTableModel.addRow(new Object[]{
-                p.getName(),
-                formattedTime,
-                p.getStatusString(),
-                p.getSuspendedReadyString(),
-                p.getSuspendedBlockedString(),
-                p.getResumedString()
+
+            processTableModel.addRow(new Object[] {
+                    p.getName(),
+                    formattedTime,
+                    p.getStatusString(),
+                    p.getSuspendedReadyString(),
+                    p.getSuspendedBlockedString(),
+                    p.getResumedString()
             });
         }
     }
 
     private void updateResultTable(int tableIndex) {
         if (tableIndex == 0) {
-            // Tabla inicial
+          
             resultTableModels[0].setRowCount(0);
             for (model.Process p : processManager.getInitialProcesses()) {
                 String formattedTime = numberFormatter.format(p.getOriginalTime());
-                
-                resultTableModels[0].addRow(new Object[]{
-                    p.getName(),
-                    formattedTime,
-                    p.getStatusString(),
-                    p.getSuspendedReadyString(),
-                    p.getSuspendedBlockedString(),
-                    p.getResumedString(),
-                    0
+
+                resultTableModels[0].addRow(new Object[] {
+                        p.getName(),
+                        formattedTime,
+                        p.getStatusString(),
+                        p.getSuspendedReadyString(),
+                        p.getSuspendedBlockedString(),
+                        p.getResumedString(),
+                        0
                 });
             }
         } else {
-            // Tablas de logs
+            
             List<Log> logs = processManager.getLogsByFilter(filters[tableIndex]);
             resultTableModels[tableIndex].setRowCount(0);
-            
+
             for (Log log : logs) {
                 String formattedTime = numberFormatter.format(log.getRemainingTime());
-                
-                resultTableModels[tableIndex].addRow(new Object[]{
-                    log.getProcessName(),
-                    formattedTime,
-                    log.getStatusString(),
-                    log.getSuspendedReadyString(),
-                    log.getSuspendedBlockedString(),
-                    log.getResumedString(),
-                    log.getCycleCount()
+
+                resultTableModels[tableIndex].addRow(new Object[] {
+                        log.getProcessName(),
+                        formattedTime,
+                        log.getStatusString(),
+                        log.getSuspendedReadyString(),
+                        log.getSuspendedBlockedString(),
+                        log.getResumedString(),
+                        log.getCycleCount()
                 });
             }
         }
@@ -733,30 +769,30 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private void openUserManual() {
         try {
             File manualFile = new File("Manual_Usuario.pdf");
-            
+
             if (!manualFile.exists()) {
                 showError("No se encontró el archivo del manual de usuario.<br>" +
-                         "Asegúrese de que el archivo 'Manual_Usuario.pdf'<br>" +
-                         "esté en la misma carpeta que el programa.");
+                        "Asegúrese de que el archivo 'Manual_Usuario.pdf'<br>" +
+                        "esté en la misma carpeta que el programa.");
                 return;
             }
 
             if (Desktop.isDesktopSupported()) {
                 Desktop desktop = Desktop.getDesktop();
-                
+
                 if (desktop.isSupported(Desktop.Action.OPEN)) {
                     desktop.open(manualFile);
                 } else {
                     showError("Su sistema no permite abrir archivos PDF automáticamente.<br>" +
-                             "Por favor, abra manualmente el archivo:<br>" +
-                             "Manual_Usuario_Simulador_Procesos.pdf");
+                            "Por favor, abra manualmente el archivo:<br>" +
+                            "Manual_Usuario_Simulador_Procesos.pdf");
                 }
             } else {
                 showError("Su sistema no permite abrir archivos automáticamente.<br>" +
-                         "Por favor, abra manualmente el archivo:<br>" +
-                         manualFile.getAbsolutePath());
+                        "Por favor, abra manualmente el archivo:<br>" +
+                        manualFile.getAbsolutePath());
             }
-            
+
         } catch (IOException ex) {
             showError("Error al abrir el manual de usuario:<br>" + ex.getMessage());
         } catch (Exception ex) {
@@ -775,24 +811,24 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
-        
-        switch(command) {
+
+        switch (command) {
             case Constants.CLOSE_WARNING:
             case Constants.CLOSE_INFO:
-                ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
+                ((JDialog) ((JButton) e.getSource()).getTopLevelAncestor()).dispose();
                 break;
-                
+
             case Constants.CONFIRM_YES:
                 handleConfirmYes();
-                ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
+                ((JDialog) ((JButton) e.getSource()).getTopLevelAncestor()).dispose();
                 break;
-                
+
             case Constants.CONFIRM_NO:
-                ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
+                ((JDialog) ((JButton) e.getSource()).getTopLevelAncestor()).dispose();
                 break;
         }
     }
-    
+
     private void handleConfirmYes() {
         if (currentAction != null) {
             if (currentAction.startsWith("DELETE_PROCESS:")) {
@@ -803,11 +839,11 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
             } else if (currentAction.equals("CLEAR_ALL")) {
                 processManager.clearAll();
                 updateProcessTable();
-                
+
                 for (DefaultTableModel model : resultTableModels) {
                     model.setRowCount(0);
                 }
-                
+
                 clearForm();
                 showInfo("Todos los datos han sido eliminados");
             }

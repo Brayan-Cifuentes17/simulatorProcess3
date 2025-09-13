@@ -12,13 +12,13 @@ public class ProcessManager {
         executionLogs = new ArrayList<>();
     }
 
-    // Método básico para agregar proceso
+  
     public void addProcess(String name, long time, Status status) {
         Process process = new Process(name, time, status);
         initialProcesses.add(process);
     }
 
-    // Método completo para agregar proceso con estados de suspensión
+   
     public void addProcess(String name, long time, Status status, 
                           Status suspendedReady, Status suspendedBlocked, Status resumed) {
         Process process = new Process(name, time, status, suspendedReady, suspendedBlocked, resumed);
@@ -34,7 +34,7 @@ public class ProcessManager {
         initialProcesses.removeIf(p -> p.getName().equalsIgnoreCase(name.trim()));
     }
 
-    // Método básico para editar proceso
+   
     public void editProcess(int position, String processName, long newTime, Status newStatus) {
         if (position >= 0 && position < initialProcesses.size()) {
             Process existingProcess = initialProcesses.get(position);
@@ -45,7 +45,7 @@ public class ProcessManager {
         }
     }
 
-    // Método completo para editar proceso con estados de suspensión
+    
     public void editProcess(int position, String processName, long newTime, Status newStatus, 
                            Status suspendedReady, Status suspendedBlocked, Status resumed) {
         if (position >= 0 && position < initialProcesses.size()) {
@@ -65,10 +65,10 @@ public class ProcessManager {
     public void runSimulation() {
         executionLogs.clear();
         
-        // Clonar procesos para la simulación
+       
         ArrayList<Process> processQueue = cloneProcesses();
         
-        // Ejecutar simulación FIFO
+      
         while (!processQueue.isEmpty()) {
             Process currentProcess = processQueue.remove(0);
             executeProcessCycle(currentProcess, processQueue);
@@ -84,103 +84,100 @@ public class ProcessManager {
     }
 
     private void executeProcessCycle(Process process, ArrayList<Process> queue) {
-        // Estado: Listo
+        
         addLog(process, Filter.LISTO);
 
-        // Estado: Despachado
+       
         addLog(process, Filter.DESPACHADO);
 
-        // Estado: En Ejecución
+       
         process.subtractTime(Constants.QUANTUM_TIME);
         process.incrementCycle();
         addLog(process, Filter.EN_EJECUCION);
 
-        // Verificar si el proceso terminó
+       
         if (process.isFinished()) {
             addLog(process, Filter.FINALIZADO);
             return;
         }
 
-        // Determinar el siguiente estado según el diagrama
+      
         if (process.isBlocked()) {
             handleBlockedProcess(process, queue);
         } else if (process.isSuspendedReady()) {
             handleSuspendedReadyProcess(process, queue);
         } else {
-            // Proceso normal: Tiempo Expirado -> vuelve a Listo
+           
             addLog(process, Filter.TIEMPO_EXPIRADO);
             queue.add(process);
         }
     }
 
     private void handleBlockedProcess(Process process, ArrayList<Process> queue) {
-        // Estado: Bloqueado
+     
         addLog(process, Filter.BLOQUEADO);
         
         if (process.isSuspendedBlocked()) {
-            // Ruta: Suspender -> Suspendido Bloqueado
+          
             addLog(process, Filter.SUSPENDER_BLOQUEADOS);
             addLog(process, Filter.SUSPENDIDO_BLOQUEADO);
             
-            // CASO ESPECIAL: Si también tiene suspensión de listo marcada
+           
             if (process.isSuspendedReady()) {
-                // NUEVA TRANSICIÓN: Suspendido Bloqueado → Suspendido Listo
+                
                 addLog(process, Filter.TRANSICION_BLOQUEADO_A_LISTO);
                 
-                // Transición especial: Suspendido Bloqueado → Suspendido Listo
+                
                 addLog(process, Filter.SUSPENDIDO_LISTO);
                 
-                // Si está marcado como reanudado, continúa el flujo
+                
                 if (process.isResumed()) {
-                    // Reanudar desde Suspendido Listo
+                    
                     addLog(process, Filter.REANUDAR_LISTOS);
                     
-                    // VUELVE DIRECTAMENTE A LA COLA (estado Listo en el próximo ciclo)
+                   
                     queue.add(process);
                 } else {
-                    // Se queda en Suspendido Listo (no se reanuda aún)
-                    // El proceso no vuelve a la cola hasta ser reanudado
+               
                 }
                 return;
             } else {
-                // Flujo normal: solo suspensión bloqueada
+                
                 if (process.isResumed()) {
                     addLog(process, Filter.REANUDAR_BLOQUEADOS);
                     
-                    // Vuelve al estado Bloqueado después de reanudar
+                   
                     addLog(process, Filter.BLOQUEADO);
                     
-                    // Estado: Despertar (Terminación de E/S)
+                   
                     addLog(process, Filter.DESPERTAR);
                 } else {
-                    // Se queda en Suspendido Bloqueado (no se reanuda aún)
+              
                     return;
                 }
             }
         } else {
-            // Proceso bloqueado normal (sin suspensión bloqueada)
-            // Estado: Despertar (Terminación de E/S)
+          
             addLog(process, Filter.DESPERTAR);
         }
         
-        // Vuelve a la cola para el próximo ciclo
+        
         queue.add(process);
     }
 
     private void handleSuspendedReadyProcess(Process process, ArrayList<Process> queue) {
-        // Ruta: Suspender -> Suspendido Listo
+        
         addLog(process, Filter.SUSPENDER_LISTOS);
         addLog(process, Filter.SUSPENDIDO_LISTO);
         
-        // Solo continúa si está marcado como reanudado
+        
         if (process.isResumed()) {
             addLog(process, Filter.REANUDAR_LISTOS);
             
-            // Después de reanudar, vuelve a la cola
+           
             queue.add(process);
         } else {
-            // Se queda en Suspendido Listo (no se reanuda aún)
-            // El proceso no vuelve a la cola hasta ser reanudado
+          
         }
     }
 
@@ -199,7 +196,7 @@ public class ProcessManager {
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-    // Métodos para obtener procesos según sus estados de suspensión
+    
     public List<Process> getSuspendedReadyProcesses() {
         return initialProcesses.stream()
                 .filter(Process::isSuspendedReady)
@@ -218,7 +215,7 @@ public class ProcessManager {
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-    // Métodos para obtener logs de estados específicos de suspensión
+    
     public List<Process> getSuspendedReadyFromLogs() {
         List<Process> suspendedProcesses = new ArrayList<>();
         List<Log> suspendedLogs = getLogsByFilter(Filter.SUSPENDIDO_LISTO);
@@ -270,11 +267,11 @@ public class ProcessManager {
     public List<Process> getResumedFromLogs() {
         List<Process> resumedProcesses = new ArrayList<>();
         
-        // Buscar logs de ambos tipos de reanudación
+        
         List<Log> resumedReadyLogs = getLogsByFilter(Filter.REANUDAR_LISTOS);
         List<Log> resumedBlockedLogs = getLogsByFilter(Filter.REANUDAR_BLOQUEADOS);
         
-        // Procesar logs de reanudación de listos
+        
         for (Log log : resumedReadyLogs) {
             Process originalProcess = findProcessByName(log.getProcessName());
             if (originalProcess != null) {
@@ -292,7 +289,7 @@ public class ProcessManager {
             }
         }
         
-        // Procesar logs de reanudación de bloqueados
+       
         for (Log log : resumedBlockedLogs) {
             Process originalProcess = findProcessByName(log.getProcessName());
             if (originalProcess != null) {
