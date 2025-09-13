@@ -7,7 +7,11 @@ public class Log {
     private Filter filter;
     private int cycleCount;
     private long timestamp;
-    private int priority; 
+    
+    // Estados de suspensión
+    private Status suspendedReady;
+    private Status suspendedBlocked;
+    private Status resumed;
 
     public Log(Process process, Filter filter) {
         this.processName = process.getName();
@@ -16,7 +20,9 @@ public class Log {
         this.cycleCount = process.getCycleCount();
         this.filter = filter;
         this.timestamp = System.currentTimeMillis();
-        this.priority = process.getFinalPriority();
+        this.suspendedReady = process.getSuspendedReady();
+        this.suspendedBlocked = process.getSuspendedBlocked();
+        this.resumed = process.getResumed();
     }
 
     public String getProcessName() {
@@ -46,9 +52,29 @@ public class Log {
     public long getTimestamp() {
         return timestamp;
     }
-
-    public int getPriority() {
-        return priority;
+    
+    public Status getSuspendedReady() {
+        return suspendedReady;
+    }
+    
+    public Status getSuspendedBlocked() {
+        return suspendedBlocked;
+    }
+    
+    public Status getResumed() {
+        return resumed;
+    }
+    
+    public String getSuspendedReadyString() {
+        return suspendedReady == Status.SUSPENDIDO_LISTO ? "Si" : "No";
+    }
+    
+    public String getSuspendedBlockedString() {
+        return suspendedBlocked == Status.SUSPENDIDO_BLOQUEADO ? "Si" : "No";
+    }
+    
+    public String getResumedString() {
+        return resumed == Status.REANUDADO ? "Si" : "No";
     }
 
     @Override
@@ -59,7 +85,9 @@ public class Log {
                 ", status=" + status +
                 ", filter=" + filter +
                 ", cycleCount=" + cycleCount +
-                ", priority=" + priority +
+                ", suspendedReady=" + suspendedReady +
+                ", suspendedBlocked=" + suspendedBlocked +
+                ", resumed=" + resumed +
                 '}';
     }
 }

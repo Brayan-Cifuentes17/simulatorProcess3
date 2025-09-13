@@ -1,7 +1,7 @@
 package model;
 
 public enum Filter {
-    
+    // Estados básicos según el diagrama
     INICIAL,
     LISTO,
     DESPACHADO,
@@ -10,9 +10,15 @@ public enum Filter {
     BLOQUEADO,
     DESPERTAR,
     FINALIZADO,
-    TODO,
-    PRIORIDAD_CAMBIADA,
-    SUSPENDIDO,
-    REANUDADO,
-    DESTRUIDO
+    
+    // Estados de suspensión según el diagrama
+    SUSPENDER_LISTOS,
+    SUSPENDIDO_LISTO,
+    REANUDAR_LISTOS,
+    SUSPENDER_BLOQUEADOS,
+    SUSPENDIDO_BLOQUEADO,
+    REANUDAR_BLOQUEADOS,
+    
+    // Filtro especial
+    TODO
 }

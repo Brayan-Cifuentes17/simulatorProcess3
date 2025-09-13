@@ -1,75 +1,28 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ProcessManager {
     private ArrayList<Process> initialProcesses;
     private ArrayList<Log> executionLogs;
-    private Map<String, List<String>> processRelations; 
 
     public ProcessManager() {
         initialProcesses = new ArrayList<>();
         executionLogs = new ArrayList<>();
-        processRelations = new HashMap<>();
     }
 
-   
+    // Método básico para agregar proceso
     public void addProcess(String name, long time, Status status) {
         Process process = new Process(name, time, status);
         initialProcesses.add(process);
     }
 
- 
-    public void addProcess(String name, long time, Status status, int finalPriority, 
-                          Status suspended, Status resumed, Status destroyed, String referencedProcess) {
-        
-      
-        Process process = new Process(name, time, status, 1, suspended, resumed, destroyed, referencedProcess);
-        
-        
-        if (finalPriority != 1) {
-            process.setFinalPriority(finalPriority);
-            
-        }
-        
+    // Método completo para agregar proceso con estados de suspensión
+    public void addProcess(String name, long time, Status status, 
+                          Status suspendedReady, Status suspendedBlocked, Status resumed) {
+        Process process = new Process(name, time, status, suspendedReady, suspendedBlocked, resumed);
         initialProcesses.add(process);
-        
-        
-        if (referencedProcess != null && !referencedProcess.trim().isEmpty()) {
-            String[] refs = referencedProcess.split(",");
-            for (String ref : refs) {
-                addProcessRelation(name, ref.trim());
-            }
-        }
-    }
-
-    
-    public void addProcess(String name, long time, Status status, int initialPriority, int finalPriority, 
-                          Status suspended, Status resumed, Status destroyed, String referencedProcess) {
-        
-        Process process = new Process(name, time, status, initialPriority, suspended, resumed, destroyed, referencedProcess);
-        
-        
-        if (finalPriority != initialPriority) {
-            process.setFinalPriority(finalPriority);
-            
-        }
-        
-        initialProcesses.add(process);
-        
-       
-        if (referencedProcess != null && !referencedProcess.trim().isEmpty()) {
-            addProcessRelation(name, referencedProcess);
-        }
-    }
-
-    private void addProcessRelation(String process, String referencedProcess) {
-        processRelations.computeIfAbsent(process, k -> new ArrayList<>()).add(referencedProcess);
     }
 
     public boolean processExists(String name) {
@@ -77,64 +30,30 @@ public class ProcessManager {
                 .anyMatch(p -> p.getName().equalsIgnoreCase(name.trim()));
     }
 
-    public boolean priorityExists(int priority) {
-        return initialProcesses.stream()
-                .anyMatch(p -> p.getFinalPriority() == priority);
-    }
-
-    
-    public boolean isProcessReferenced(String processName) {
-        return initialProcesses.stream()
-                .anyMatch(p -> p.hasReference() && 
-                         p.getReferencedProcess().equalsIgnoreCase(processName.trim()));
-    }
-
     public void removeProcess(String name) {
         initialProcesses.removeIf(p -> p.getName().equalsIgnoreCase(name.trim()));
-        
-        
-        processRelations.remove(name);
-        processRelations.values().forEach(list -> list.removeIf(ref -> ref.equalsIgnoreCase(name.trim())));
     }
 
+    // Método básico para editar proceso
     public void editProcess(int position, String processName, long newTime, Status newStatus) {
         if (position >= 0 && position < initialProcesses.size()) {
             Process existingProcess = initialProcesses.get(position);
             if (existingProcess.getName().equalsIgnoreCase(processName)) {
-               
                 Process updatedProcess = new Process(processName, newTime, newStatus);
-                
                 initialProcesses.set(position, updatedProcess);
             }
         }
     }
 
+    // Método completo para editar proceso con estados de suspensión
     public void editProcess(int position, String processName, long newTime, Status newStatus, 
-                           int finalPriority, Status suspended, Status resumed, Status destroyed, String referencedProcess) {
+                           Status suspendedReady, Status suspendedBlocked, Status resumed) {
         if (position >= 0 && position < initialProcesses.size()) {
             Process existingProcess = initialProcesses.get(position);
             if (existingProcess.getName().equalsIgnoreCase(processName)) {
-                
-             
-                processRelations.remove(processName);
-                
-               
-                int originalInitialPriority = existingProcess.getInitialPriority();
-                
-           
                 Process updatedProcess = new Process(processName, newTime, newTime, newStatus, 0,
-                                                   originalInitialPriority, finalPriority, suspended, resumed, destroyed, referencedProcess);
-                
-            
+                                                   suspendedReady, suspendedBlocked, resumed);
                 initialProcesses.set(position, updatedProcess);
-                
-              
-                if (referencedProcess != null && !referencedProcess.trim().isEmpty()) {
-                    String [] refs = referencedProcess.split(",");
-                    for (String ref : refs) {
-                        addProcessRelation(processName, ref.trim());
-                    }
-                }
             }
         }
     }
@@ -146,26 +65,12 @@ public class ProcessManager {
     public void runSimulation() {
         executionLogs.clear();
         
-       
+        // Clonar procesos para la simulación
         ArrayList<Process> processQueue = cloneProcesses();
         
-
-        processQueue.sort((a, b) -> Integer.compare(a.getFinalPriority(), b.getFinalPriority()));
-        
-       
-        for (Process p : processQueue) {
-            if (p.hasPriorityChange()) {
-                addLog(p, Filter.PRIORIDAD_CAMBIADA);
-                
-            }
-        }
-        
-      
+        // Ejecutar simulación FIFO
         while (!processQueue.isEmpty()) {
-           
             Process currentProcess = processQueue.remove(0);
-            
-           
             executeProcessCycle(currentProcess, processQueue);
         }
     }
@@ -179,49 +84,64 @@ public class ProcessManager {
     }
 
     private void executeProcessCycle(Process process, ArrayList<Process> queue) {
-    
+        // Estado: Listo
         addLog(process, Filter.LISTO);
 
-       
-        if (process.isSuspended()) {
-            addLog(process, Filter.SUSPENDIDO);
-        }
-
-        
-        if (process.isResumed()) {
-            addLog(process, Filter.REANUDADO);
-        }
-
-      
+        // Estado: Despachado
         addLog(process, Filter.DESPACHADO);
 
-        
+        // Estado: En Ejecución
         process.subtractTime(Constants.QUANTUM_TIME);
+        process.incrementCycle();
         addLog(process, Filter.EN_EJECUCION);
 
-      
-        if (process.isDestroyed()) {
-            addLog(process, Filter.DESTRUIDO);
-            return; 
-        }
-
-        
+        // Verificar si el proceso terminó
         if (process.isFinished()) {
             addLog(process, Filter.FINALIZADO);
+            return;
+        }
+
+        // Determinar el siguiente estado según el diagrama
+        if (process.isBlocked()) {
+            handleBlockedProcess(process, queue);
+        } else if (process.isSuspendedReady()) {
+            handleSuspendedReadyProcess(process, queue);
         } else {
-            
-            process.incrementCycle();
-            
-            if (process.isBlocked()) {
-                addLog(process, Filter.BLOQUEADO);
-                addLog(process, Filter.DESPERTAR);
-            } else {
-                addLog(process, Filter.TIEMPO_EXPIRADO);
-            }
-            
-   
+            // Proceso normal: Tiempo Expirado -> vuelve a Listo
+            addLog(process, Filter.TIEMPO_EXPIRADO);
             queue.add(process);
         }
+    }
+
+    private void handleBlockedProcess(Process process, ArrayList<Process> queue) {
+        // Estado: Bloqueado
+        addLog(process, Filter.BLOQUEADO);
+        
+        if (process.isSuspendedBlocked()) {
+            // Ruta: Suspender -> Suspendido Bloqueado -> Reanudar -> Bloqueado -> Despertar
+            addLog(process, Filter.SUSPENDER_BLOQUEADOS);
+            addLog(process, Filter.SUSPENDIDO_BLOQUEADO);
+            addLog(process, Filter.REANUDAR_BLOQUEADOS);
+            
+            // Vuelve al estado Bloqueado después de reanudar
+            addLog(process, Filter.BLOQUEADO);
+        }
+        
+        // Estado: Despertar (Terminación de E/S)
+        addLog(process, Filter.DESPERTAR);
+        
+        // Vuelve a la cola para el próximo ciclo
+        queue.add(process);
+    }
+
+    private void handleSuspendedReadyProcess(Process process, ArrayList<Process> queue) {
+        // Ruta: Suspender -> Suspendido Listo -> Reanudar
+        addLog(process, Filter.SUSPENDER_LISTOS);
+        addLog(process, Filter.SUSPENDIDO_LISTO);
+        addLog(process, Filter.REANUDAR_LISTOS);
+        
+        // Después de reanudar, vuelve a la cola
+        queue.add(process);
     }
 
     private void addLog(Process process, Filter filter) {
@@ -239,121 +159,43 @@ public class ProcessManager {
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-    
-    public List<Process> getProcessesWithPriorityChanges() {
-        
-        List<Process> result = new ArrayList<>();
-        for (Process p : initialProcesses) {
-          
-            if (p.hasPriorityChange()) {
-                result.add(p);
-            }
-        }
-     
-        return result;
+    // Métodos para obtener procesos según sus estados de suspensión
+    public List<Process> getSuspendedReadyProcesses() {
+        return initialProcesses.stream()
+                .filter(Process::isSuspendedReady)
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-   
-    public List<String> getProcessRelationsReport() {
-        List<String> report = new ArrayList<>();
-        Set<String> addedRelations = new HashSet<>(); 
-        
-     
-        
-       
-        for (Process process : initialProcesses) {
-            if (process.hasReference() && process.getReferencedProcess() != null) {
-                String[] references = process.getReferencedProcess().split(",");
-                
-                for (String reference : references) {
-                    String cleanRef = reference.trim();
-                    
-                    
-                    if (processExists(cleanRef)) {
-                        String relation = process.getName() + " -> " + cleanRef;
-                        
-                        if (!addedRelations.contains(relation)) {
-                            report.add(relation);
-                            addedRelations.add(relation);
-                            
-                        }
-                    }
-                }
-            }
+    public List<Process> getSuspendedBlockedProcesses() {
+        return initialProcesses.stream()
+                .filter(Process::isSuspendedBlocked)
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
-    
-  
-    for (Process process : initialProcesses) {
-        if (process.hasReference() && process.getReferencedProcess() != null) {
-            String[] references = process.getReferencedProcess().split(",");
-            
-            for (String reference : references) {
-                String cleanRef = reference.trim();
-                
-           
-                if (processExists(cleanRef)) {
-                   
-                    String inverseRelation = cleanRef + " -> " + process.getName();
-                    
-                    if (!addedRelations.contains(inverseRelation)) {
-                        report.add(inverseRelation);
-                        addedRelations.add(inverseRelation);
-                      
-                    }
-                }
-            }
-        }
+
+    public List<Process> getResumedProcesses() {
+        return initialProcesses.stream()
+                .filter(Process::isResumed)
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
-    
 
-    report.sort(String::compareTo);
-    
-
-    return report;
-}
-
-   
-    public List<Process> getSuspendedProcesses() {
-       
+    // Métodos para obtener logs de estados específicos de suspensión
+    public List<Process> getSuspendedReadyFromLogs() {
         List<Process> suspendedProcesses = new ArrayList<>();
+        List<Log> suspendedLogs = getLogsByFilter(Filter.SUSPENDIDO_LISTO);
         
-       
-        List<Log> suspendedLogs = getLogsByFilter(Filter.SUSPENDIDO);
-        
-        if (suspendedLogs.isEmpty()) {
-            
-            return initialProcesses.stream()
-                    .filter(Process::isSuspended)
-                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        }
-        
-       
         for (Log log : suspendedLogs) {
-           
-            Process originalProcess = null;
-            for (Process p : initialProcesses) {
-                if (p.getName().equals(log.getProcessName())) {
-                    originalProcess = p;
-                    break;
-                }
-            }
-            
+            Process originalProcess = findProcessByName(log.getProcessName());
             if (originalProcess != null) {
-                
                 Process suspendedProcess = new Process(
                     log.getProcessName(),
                     originalProcess.getOriginalTime(),
-                    log.getRemainingTime(), 
+                    log.getRemainingTime(),
                     log.getStatus(),
                     log.getCycleCount(),
-                    originalProcess.getInitialPriority(),
-                    originalProcess.getFinalPriority(),
-                    originalProcess.getSuspended(),
-                    originalProcess.getResumed(),
-                    originalProcess.getDestroyed(),
-                    originalProcess.getReferencedProcess()
+                    log.getSuspendedReady(),
+                    log.getSuspendedBlocked(),
+                    log.getResumed()
                 );
-                
                 suspendedProcesses.add(suspendedProcess);
             }
         }
@@ -361,47 +203,69 @@ public class ProcessManager {
         return suspendedProcesses;
     }
 
-    public List<Process> getResumedProcesses() {
-    
-        List<Process> resumedProcesses = new ArrayList<>();
+    public List<Process> getSuspendedBlockedFromLogs() {
+        List<Process> suspendedProcesses = new ArrayList<>();
+        List<Log> suspendedLogs = getLogsByFilter(Filter.SUSPENDIDO_BLOQUEADO);
         
-        
-        List<Log> resumedLogs = getLogsByFilter(Filter.REANUDADO);
-        
-        if (resumedLogs.isEmpty()) {
-            
-            return initialProcesses.stream()
-                    .filter(Process::isResumed)
-                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        for (Log log : suspendedLogs) {
+            Process originalProcess = findProcessByName(log.getProcessName());
+            if (originalProcess != null) {
+                Process suspendedProcess = new Process(
+                    log.getProcessName(),
+                    originalProcess.getOriginalTime(),
+                    log.getRemainingTime(),
+                    log.getStatus(),
+                    log.getCycleCount(),
+                    log.getSuspendedReady(),
+                    log.getSuspendedBlocked(),
+                    log.getResumed()
+                );
+                suspendedProcesses.add(suspendedProcess);
+            }
         }
         
+        return suspendedProcesses;
+    }
+
+    public List<Process> getResumedFromLogs() {
+        List<Process> resumedProcesses = new ArrayList<>();
         
-        for (Log log : resumedLogs) {
-           
-            Process originalProcess = null;
-            for (Process p : initialProcesses) {
-                if (p.getName().equals(log.getProcessName())) {
-                    originalProcess = p;
-                    break;
-                }
-            }
-            
+        // Buscar logs de ambos tipos de reanudación
+        List<Log> resumedReadyLogs = getLogsByFilter(Filter.REANUDAR_LISTOS);
+        List<Log> resumedBlockedLogs = getLogsByFilter(Filter.REANUDAR_BLOQUEADOS);
+        
+        // Procesar logs de reanudación de listos
+        for (Log log : resumedReadyLogs) {
+            Process originalProcess = findProcessByName(log.getProcessName());
             if (originalProcess != null) {
-              
                 Process resumedProcess = new Process(
                     log.getProcessName(),
                     originalProcess.getOriginalTime(),
                     log.getRemainingTime(),
                     log.getStatus(),
                     log.getCycleCount(),
-                    originalProcess.getInitialPriority(),
-                    originalProcess.getFinalPriority(),
-                    originalProcess.getSuspended(),
-                    originalProcess.getResumed(),
-                    originalProcess.getDestroyed(),
-                    originalProcess.getReferencedProcess()
+                    log.getSuspendedReady(),
+                    log.getSuspendedBlocked(),
+                    log.getResumed()
                 );
-                
+                resumedProcesses.add(resumedProcess);
+            }
+        }
+        
+        // Procesar logs de reanudación de bloqueados
+        for (Log log : resumedBlockedLogs) {
+            Process originalProcess = findProcessByName(log.getProcessName());
+            if (originalProcess != null) {
+                Process resumedProcess = new Process(
+                    log.getProcessName(),
+                    originalProcess.getOriginalTime(),
+                    log.getRemainingTime(),
+                    log.getStatus(),
+                    log.getCycleCount(),
+                    log.getSuspendedReady(),
+                    log.getSuspendedBlocked(),
+                    log.getResumed()
+                );
                 resumedProcesses.add(resumedProcess);
             }
         }
@@ -409,10 +273,13 @@ public class ProcessManager {
         return resumedProcesses;
     }
 
-    public List<Process> getDestroyedProcesses() {
-        return initialProcesses.stream()
-                .filter(Process::isDestroyed)
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    private Process findProcessByName(String name) {
+        for (Process p : initialProcesses) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
     }
 
     public ArrayList<Process> getInitialProcesses() {
@@ -426,7 +293,6 @@ public class ProcessManager {
     public void clearAll() {
         initialProcesses.clear();
         executionLogs.clear();
-        processRelations.clear();
     }
 
     public void clearLogs() {
