@@ -19,6 +19,9 @@ public enum Filter {
     SUSPENDIDO_BLOQUEADO,
     REANUDAR_BLOQUEADOS,
     
+    // Nueva transición especial: Suspendido Bloqueado → Suspendido Listo
+    TRANSICION_BLOQUEADO_A_LISTO,
+    
     // Filtro especial
     TODO
 }

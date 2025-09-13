@@ -39,14 +39,16 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         "Inicial", "Listos", "Despachados", "En Ejecución", 
         "Tiempo Expirado", "Bloqueados", "Despertar", "Finalizados",
         "Suspender Listos", "Suspendido Listo", "Reanudar Listos",
-        "Suspender Bloqueados", "Suspendido Bloqueado", "Reanudar Bloqueados"
+        "Suspender Bloqueados", "Suspendido Bloqueado", "Reanudar Bloqueados",
+        "Suspendido Bloq a Suspendido Listo"
     };
     
     private Filter[] filters = {
         Filter.INICIAL, Filter.LISTO, Filter.DESPACHADO, Filter.EN_EJECUCION,
         Filter.TIEMPO_EXPIRADO, Filter.BLOQUEADO, Filter.DESPERTAR, Filter.FINALIZADO,
         Filter.SUSPENDER_LISTOS, Filter.SUSPENDIDO_LISTO, Filter.REANUDAR_LISTOS,
-        Filter.SUSPENDER_BLOQUEADOS, Filter.SUSPENDIDO_BLOQUEADO, Filter.REANUDAR_BLOQUEADOS
+        Filter.SUSPENDER_BLOQUEADOS, Filter.SUSPENDIDO_BLOQUEADO, Filter.REANUDAR_BLOQUEADOS,
+        Filter.TRANSICION_BLOQUEADO_A_LISTO
     };
 
     private String currentAction;
@@ -393,21 +395,21 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     }
 
     private JPanel createResultButtonPanel() {
-        JPanel panel = new JPanel(new GridLayout(3, 5, 5, 5));
-        
-        for (int i = 0; i < tableNames.length; i++) {
-            JButton btn = new JButton(tableNames[i]);
-            btn.setPreferredSize(new Dimension(120, 30));
-            final int index = i;
-            btn.addActionListener(e -> {
-                cardLayout.show(resultsPanel, tableNames[index]);
-                updateResultTable(index);
-            });
-            panel.add(btn);
-        }
+            JPanel panel = new JPanel(new GridLayout(3, 5, 5, 5));
+            
+            for (int i = 0; i < tableNames.length; i++) {
+                JButton btn = new JButton(tableNames[i]);
+                btn.setPreferredSize(new Dimension(120, 30));
+                final int index = i;
+                btn.addActionListener(e -> {
+                    cardLayout.show(resultsPanel, tableNames[index]);
+                    updateResultTable(index);
+                });
+                panel.add(btn);
+            }
 
-        return panel;
-    }
+            return panel;
+        }
 
     private void setupEventHandlers() {
         // Método placeholder para configuraciones adicionales
