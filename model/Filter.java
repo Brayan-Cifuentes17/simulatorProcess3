@@ -7,6 +7,7 @@ public enum Filter {
     DESPACHADO,
     EN_EJECUCION,
     TIEMPO_EXPIRADO,
+    BLOQUEAR,
     BLOQUEADO,
     DESPERTAR,
     FINALIZADO,
@@ -21,7 +22,8 @@ public enum Filter {
     
     // Nueva transición especial: Suspendido Bloqueado → Suspendido Listo
     TRANSICION_BLOQUEADO_A_LISTO,
-    
+
+    DE_LISTO_A_SUSPENDIDO,
     // Filtro especial
     TODO
 }

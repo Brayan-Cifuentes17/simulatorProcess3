@@ -114,55 +114,54 @@ public class ProcessManager {
     }
 
     private void handleBlockedProcess(Process process, ArrayList<Process> queue) {
-     
+    // Registrar que el proceso está bloqueado
+        addLog(process, Filter.BLOQUEAR);
         addLog(process, Filter.BLOQUEADO);
         
+        // Caso 1: Proceso bloqueado y suspendido bloqueado
         if (process.isSuspendedBlocked()) {
-          
+            // Suspender procesos bloqueados
             addLog(process, Filter.SUSPENDER_BLOQUEADOS);
             addLog(process, Filter.SUSPENDIDO_BLOQUEADO);
             
-           
+            // Si también está marcado como suspendido listo, hacer la transición especial
             if (process.isSuspendedReady()) {
-                
+                // Transición especial: Suspendido Bloqueado → Suspendido Listo
                 addLog(process, Filter.TRANSICION_BLOQUEADO_A_LISTO);
-                
-                
                 addLog(process, Filter.SUSPENDIDO_LISTO);
-                
-                
-                if (process.isResumed()) {
-                    
-                    addLog(process, Filter.REANUDAR_LISTOS);
-                    
-                   
-                    queue.add(process);
-                } else {
-               
-                }
-                return;
+                addLog(process, Filter.REANUDAR_LISTOS);
+                queue.add(process);
+
             } else {
-                
-                if (process.isResumed()) {
+                // Solo suspendido bloqueado, sin transición a suspendido listo
                     addLog(process, Filter.REANUDAR_BLOQUEADOS);
-                    
-                   
+                    // Después de reanudar, sigue como bloqueado y luego despierta
                     addLog(process, Filter.BLOQUEADO);
-                    
-                   
                     addLog(process, Filter.DESPERTAR);
-                } else {
-              
-                    return;
-                }
+                    queue.add(process);
+                
             }
-        } else {
-          
-            addLog(process, Filter.DESPERTAR);
         }
-        
-        
-        queue.add(process);
+        // Caso 2: Proceso bloqueado y suspendido listo (pero NO suspendido bloqueado)
+        else if (process.isSuspendedReady()) {
+            // Primero despierta del bloqueo
+            addLog(process, Filter.DESPERTAR);
+            addLog(process, Filter.LISTO);
+            // Luego se suspende como listo
+            addLog(process, Filter.DE_LISTO_A_SUSPENDIDO);
+            addLog(process, Filter.SUSPENDIDO_LISTO);
+            
+            addLog(process, Filter.REANUDAR_LISTOS);
+               
+            queue.add(process);
+            
+        }
+        // Caso 3: Proceso bloqueado normal (sin suspensiones)
+        else {
+            // Simplemente despierta y vuelve a la cola
+            addLog(process, Filter.DESPERTAR);
+            queue.add(process);
+        }
     }
 
     private void handleSuspendedReadyProcess(Process process, ArrayList<Process> queue) {
@@ -170,15 +169,8 @@ public class ProcessManager {
         addLog(process, Filter.SUSPENDER_LISTOS);
         addLog(process, Filter.SUSPENDIDO_LISTO);
         
-        
-        if (process.isResumed()) {
-            addLog(process, Filter.REANUDAR_LISTOS);
-            
-           
-            queue.add(process);
-        } else {
-          
-        }
+        addLog(process, Filter.REANUDAR_LISTOS);
+         queue.add(process);
     }
 
     private void addLog(Process process, Filter filter) {

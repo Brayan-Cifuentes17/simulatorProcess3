@@ -17,7 +17,6 @@ import java.util.Locale;
 public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private ProcessManager processManager;
 
-   
     private JTextField txtProcessName;
     private JTextField txtProcessTime;
     private JComboBox<String> cmbStatus;
@@ -25,28 +24,25 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private JComboBox<String> cmbSuspendedBlocked;
     private JComboBox<String> cmbResumed;
 
-    
     private DefaultTableModel processTableModel;
     private JTable processTable;
 
-   
     private JPanel resultsPanel;
     private CardLayout cardLayout;
 
-    
     private DefaultTableModel[] resultTableModels;
     private String[] tableNames = {
             "Inicial", "Listos", "Despachados", "En Ejecución",
-            "Tiempo Expirado", "Bloqueados", "Despertar", "Finalizados",
-            "Suspender Listos", "Suspendido Listo", "Reanudar Listos",
+            "Tiempo Expirado","Espera de E/S", "Bloqueados", "<html>Terminacion de operacion<br>E/S o evento-Superior</html>", "Finalizados",
+            "Suspender Listos", "Suspendido Listo", "Reanudar Listos", "De Listo a Suspendido Listo",
             "Suspender Bloqueados", "Suspendido Bloqueado", "Reanudar Bloqueados",
-            "Suspendido Bloq a Suspendido Listo"
+            "<html>Terminacion de operacion<br>E/S o evento-Inferior</html>"
     };
 
     private Filter[] filters = {
             Filter.INICIAL, Filter.LISTO, Filter.DESPACHADO, Filter.EN_EJECUCION,
-            Filter.TIEMPO_EXPIRADO, Filter.BLOQUEADO, Filter.DESPERTAR, Filter.FINALIZADO,
-            Filter.SUSPENDER_LISTOS, Filter.SUSPENDIDO_LISTO, Filter.REANUDAR_LISTOS,
+            Filter.TIEMPO_EXPIRADO,Filter.BLOQUEAR, Filter.BLOQUEADO, Filter.DESPERTAR, Filter.FINALIZADO,
+            Filter.SUSPENDER_LISTOS, Filter.SUSPENDIDO_LISTO, Filter.REANUDAR_LISTOS,Filter.DE_LISTO_A_SUSPENDIDO,
             Filter.SUSPENDER_BLOQUEADOS, Filter.SUSPENDIDO_BLOQUEADO, Filter.REANUDAR_BLOQUEADOS,
             Filter.TRANSICION_BLOQUEADO_A_LISTO
     };
@@ -68,7 +64,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private void initializeComponents() {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        
         txtProcessName = new JTextField(15);
         txtProcessTime = new JTextField(15);
         cmbStatus = new JComboBox<>(new String[] { "No Bloqueado", "Bloqueado" });
@@ -78,7 +73,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
         setupTimeField();
 
-       
         processTableModel = new DefaultTableModel(
                 new String[] { "Nombre", "Tiempo", "Estado", "Suspendido Listo", "Suspendido Bloqueado", "Reanudado" },
                 0) {
@@ -90,11 +84,9 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         processTable = new JTable(processTableModel);
         processTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-       
         cardLayout = new CardLayout();
         resultsPanel = new JPanel(cardLayout);
 
-       
         resultTableModels = new DefaultTableModel[tableNames.length];
         for (int i = 0; i < tableNames.length; i++) {
             resultTableModels[i] = new DefaultTableModel(
@@ -234,7 +226,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     private void setupLayout() {
         setLayout(new BorderLayout());
 
-       
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(new Color(44, 62, 80));
         JLabel titleLabel = new JLabel("SIMULADOR DE PROCESOS");
@@ -242,7 +233,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         titleLabel.setForeground(Color.WHITE);
         titlePanel.add(titleLabel);
 
-     
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         leftPanel.setPreferredSize(new Dimension(450, 0));
@@ -257,7 +247,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         JPanel actionPanel = createActionPanel();
         leftPanel.add(actionPanel, BorderLayout.SOUTH);
 
-     
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.setBorder(BorderFactory.createTitledBorder("Resultados de la Simulación"));
 
@@ -279,7 +268,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
         int row = 0;
 
-       
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(new JLabel("Nombre:"), gbc);
@@ -287,7 +275,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         panel.add(txtProcessName, gbc);
         row++;
 
-     
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(new JLabel("Tiempo:"), gbc);
@@ -295,7 +282,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         panel.add(txtProcessTime, gbc);
         row++;
 
-       
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(new JLabel("Estado:"), gbc);
@@ -303,7 +289,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         panel.add(cmbStatus, gbc);
         row++;
 
-        
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(new JLabel("Suspendido Listo:"), gbc);
@@ -311,7 +296,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         panel.add(cmbSuspendedReady, gbc);
         row++;
 
-        
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(new JLabel("Suspendido Bloqueado:"), gbc);
@@ -319,7 +303,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         panel.add(cmbSuspendedBlocked, gbc);
         row++;
 
-        
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(new JLabel("Reanudado:"), gbc);
@@ -355,7 +338,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         btnExit.setPreferredSize(buttonSize);
         btnManual.setPreferredSize(buttonSize);
 
-       
         btnSimulate.setBackground(new Color(46, 125, 50));
         btnSimulate.setForeground(Color.WHITE);
         btnSimulate.setOpaque(true);
@@ -368,7 +350,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         btnExit.setBorderPainted(false);
         btnExit.setFocusPainted(false);
 
-     
         btnAdd.addActionListener(e -> addProcess());
         btnEdit.addActionListener(e -> editProcess());
         btnDelete.addActionListener(e -> deleteProcess());
@@ -377,7 +358,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         btnManual.addActionListener(e -> openUserManual());
         btnReset.addActionListener(e -> clearAll());
 
-     
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(btnAdd, gbc);
@@ -414,7 +394,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     }
 
     private JPanel createResultButtonPanel() {
-        JPanel panel = new JPanel(new GridLayout(3, 5, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(5, 4, 5, 5));
 
         for (int i = 0; i < tableNames.length; i++) {
             JButton btn = new JButton(tableNames[i]);
@@ -431,14 +411,13 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
     }
 
     private void setupEventHandlers() {
-        
+
     }
 
     private void addProcess() {
         String name = txtProcessName.getText().trim();
         String timeText = txtProcessTime.getText().trim();
 
-    
         if (name.isEmpty()) {
             showError("El nombre del proceso no puede estar vacío");
             return;
@@ -456,7 +435,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                 return;
             }
 
-           
             Status status = cmbStatus.getSelectedIndex() == 0 ? Status.NO_BLOQUEADO : Status.BLOQUEADO;
 
             Status suspendedReady = cmbSuspendedReady.getSelectedIndex() == 0 ? Status.NO_SUSPENDIDO_LISTO
@@ -467,7 +445,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
             Status resumed = cmbResumed.getSelectedIndex() == 0 ? Status.NO_REANUDADO : Status.REANUDADO;
 
-          
             if (resumed == Status.REANUDADO &&
                     suspendedReady == Status.NO_SUSPENDIDO_LISTO &&
                     suspendedBlocked == Status.NO_SUSPENDIDO_BLOQUEADO) {
@@ -479,7 +456,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                 return;
             }
 
-       
             processManager.addProcess(name, time, status, suspendedReady, suspendedBlocked, resumed);
 
             updateProcessTable();
@@ -517,49 +493,94 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
     private JDialog createEditDialog(model.Process process, int selectedRow) {
         JDialog dialog = new JDialog(this, "Modificar Proceso", true);
+
+        // Aplicar el mismo estilo que CustomDialog
+        dialog.setUndecorated(true); // Quitar la decoración del marco
+        dialog.setAlwaysOnTop(true); // Mantener arriba como los otros diálogos
+
         dialog.setLayout(new GridBagLayout());
-        dialog.setSize(400, 350);
+        dialog.setSize(450, 400);
         dialog.setLocationRelativeTo(this);
+
+        // Crear panel principal con el mismo color de fondo que CustomDialog
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBackground(new Color(44, 62, 80)); // Mismo color que CustomDialog
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 10, 8, 10);
 
-        
+        // Título del diálogo
+        JLabel titleLabel = new JLabel("Modificar Proceso");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        mainPanel.add(titleLabel, gbc);
+
+        // Resetear configuración para los campos
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(8, 10, 8, 10);
+
+        // Campos del formulario
         JTextField txtEditName = new JTextField(process.getName(), 20);
         txtEditName.setEditable(false);
         txtEditName.setBackground(Color.LIGHT_GRAY);
+        txtEditName.setFont(new Font("Arial", Font.PLAIN, 14));
 
         JTextField txtEditTime = new JTextField(String.valueOf(process.getOriginalTime()), 20);
+        txtEditTime.setFont(new Font("Arial", Font.PLAIN, 14));
 
         JComboBox<String> cmbEditStatus = new JComboBox<>(new String[] { "No Bloqueado", "Bloqueado" });
         cmbEditStatus.setSelectedIndex(process.isBlocked() ? 1 : 0);
+        cmbEditStatus.setFont(new Font("Arial", Font.PLAIN, 14));
 
         JComboBox<String> cmbEditSuspendedReady = new JComboBox<>(new String[] { "No", "Si" });
         cmbEditSuspendedReady.setSelectedIndex(process.isSuspendedReady() ? 1 : 0);
+        cmbEditSuspendedReady.setFont(new Font("Arial", Font.PLAIN, 14));
 
         JComboBox<String> cmbEditSuspendedBlocked = new JComboBox<>(new String[] { "No", "Si" });
         cmbEditSuspendedBlocked.setSelectedIndex(process.isSuspendedBlocked() ? 1 : 0);
+        cmbEditSuspendedBlocked.setFont(new Font("Arial", Font.PLAIN, 14));
 
         JComboBox<String> cmbEditResumed = new JComboBox<>(new String[] { "No", "Si" });
         cmbEditResumed.setSelectedIndex(process.isResumed() ? 1 : 0);
+        cmbEditResumed.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        
-        int row = 0;
-        addDialogComponent(dialog, gbc, "Nombre:", txtEditName, row++);
-        addDialogComponent(dialog, gbc, "Tiempo:", txtEditTime, row++);
-        addDialogComponent(dialog, gbc, "Estado:", cmbEditStatus, row++);
-        addDialogComponent(dialog, gbc, "Suspendido Listo:", cmbEditSuspendedReady, row++);
-        addDialogComponent(dialog, gbc, "Suspendido Bloqueado:", cmbEditSuspendedBlocked, row++);
-        addDialogComponent(dialog, gbc, "Reanudado:", cmbEditResumed, row++);
+        // Agregar componentes al panel principal
+        int row = 1;
+        addDialogComponentStyled(mainPanel, gbc, "Nombre:", txtEditName, row++);
+        addDialogComponentStyled(mainPanel, gbc, "Tiempo:", txtEditTime, row++);
+        addDialogComponentStyled(mainPanel, gbc, "Estado:", cmbEditStatus, row++);
+        addDialogComponentStyled(mainPanel, gbc, "Suspendido Listo:", cmbEditSuspendedReady, row++);
+        addDialogComponentStyled(mainPanel, gbc, "Suspendido Bloqueado:", cmbEditSuspendedBlocked, row++);
+        addDialogComponentStyled(mainPanel, gbc, "Reanudado:", cmbEditResumed, row++);
 
-        
+        // Panel de botones con el mismo estilo
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        buttonPanel.setBackground(new Color(44, 62, 80)); // Mismo fondo
+
         JButton btnSave = new JButton("Guardar");
         JButton btnCancel = new JButton("Cancelar");
 
-        Dimension buttonSize = new Dimension(100, 30);
+        Dimension buttonSize = new Dimension(100, 35);
         btnSave.setPreferredSize(buttonSize);
         btnCancel.setPreferredSize(buttonSize);
+
+        // Estilo de botones similar al CustomDialog
+        btnSave.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnSave.setBackground(Color.WHITE);
+        btnSave.setForeground(new Color(44, 62, 80));
+        btnSave.setFocusPainted(false);
+
+        btnCancel.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnCancel.setBackground(Color.WHITE);
+        btnCancel.setForeground(new Color(44, 62, 80));
+        btnCancel.setFocusPainted(false);
 
         btnSave.addActionListener(e -> {
             if (saveEditedProcess(dialog, process, selectedRow, txtEditTime,
@@ -578,9 +599,12 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         gbc.gridy = row;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(20, 10, 10, 10);
-        dialog.add(buttonPanel, gbc);
+        mainPanel.add(buttonPanel, gbc);
 
-        
+        // Agregar el panel principal al diálogo
+        dialog.add(mainPanel);
+
+        // Manejador de teclas para Enter y Escape
         dialog.addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -604,6 +628,26 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
         dialog.requestFocus();
 
         return dialog;
+    }
+
+    private void addDialogComponentStyled(JPanel panel, GridBagConstraints gbc, String labelText, JComponent component,
+            int row) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.NONE;
+
+        JLabel label = new JLabel(labelText);
+        label.setPreferredSize(new Dimension(140, 25));
+        label.setForeground(Color.WHITE); // Texto blanco para contraste
+        label.setFont(new Font("Arial", Font.PLAIN, 14));
+        panel.add(label, gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(component, gbc);
     }
 
     private void addDialogComponent(JDialog dialog, GridBagConstraints gbc, String label, JComponent component,
@@ -642,7 +686,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                     : Status.SUSPENDIDO_BLOQUEADO;
             Status newResumed = cmbResumed.getSelectedIndex() == 0 ? Status.NO_REANUDADO : Status.REANUDADO;
 
-           
             if (newResumed == Status.REANUDADO &&
                     newSuspendedReady == Status.NO_SUSPENDIDO_LISTO &&
                     newSuspendedBlocked == Status.NO_SUSPENDIDO_BLOQUEADO) {
@@ -652,7 +695,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
             if (newSuspendedBlocked == Status.SUSPENDIDO_BLOQUEADO && newStatus == Status.NO_BLOQUEADO) {
                 showError("Un proceso no puede marcarse como Suspendido Bloqueado si su estado es No Bloqueado");
                 return false;
-}
+            }
 
             processManager.editProcess(selectedRow, originalProcess.getName(), newTime, newStatus,
                     newSuspendedReady, newSuspendedBlocked, newResumed);
@@ -688,7 +731,6 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
         processManager.runSimulation();
 
-        
         for (int i = 0; i < tableNames.length; i++) {
             updateResultTable(i);
         }
@@ -716,7 +758,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
 
     private void updateResultTable(int tableIndex) {
         if (tableIndex == 0) {
-          
+
             resultTableModels[0].setRowCount(0);
             for (model.Process p : processManager.getInitialProcesses()) {
                 String formattedTime = numberFormatter.format(p.getOriginalTime());
@@ -732,7 +774,7 @@ public class ProcessSimulatorGUI extends JFrame implements ActionListener {
                 });
             }
         } else {
-            
+
             List<Log> logs = processManager.getLogsByFilter(filters[tableIndex]);
             resultTableModels[tableIndex].setRowCount(0);
 
